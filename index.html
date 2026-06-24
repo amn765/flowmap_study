@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow Map &amp; MeanFlow</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2330; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #2dd4bf;
+    --green: #3fb950; --blue: #58a6ff; --hm0: #21262d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    line-height: 1.75; padding-bottom: 80px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+
+  /* 顶栏 */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(13,17,23,.92); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar .inner {
+    max-width: 760px; margin: 0 auto; padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .topbar .back {
+    color: var(--blue); text-decoration: none; font-size: 15px; flex-shrink: 0;
+    padding: 4px 8px; margin-left: -8px; border-radius: 8px;
+  }
+  .topbar .back:active { background: var(--panel2); }
+  .topbar .ttl { font-weight: 700; font-size: 15px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .pill {
+    flex-shrink: 0; font-size: 12px; color: var(--green);
+    border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px;
+  }
+
+  /* 首页 */
+  .hero { padding: 28px 0 8px; }
+  .hero h1 { font-size: 24px; }
+  .hero p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .home-actions { display: flex; gap: 10px; margin: 16px 0 20px; }
+  .home-actions a {
+    flex: 1; text-align: center; text-decoration: none; font-weight: 600; font-size: 14px;
+    padding: 12px; border-radius: 12px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .stage-card {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 10px; text-decoration: none; color: var(--text);
+  }
+  .stage-card:active { background: var(--panel2); }
+  .stage-card .info { flex: 1; min-width: 0; }
+  .stage-card .nm { font-weight: 600; font-size: 15px; }
+  .stage-card .nm .days { color: var(--muted); font-weight: 400; font-size: 12px; margin-left: 6px; }
+  .stage-card .mini-bar { height: 6px; background: var(--hm0); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .stage-card .mini-bar > div { height: 100%; background: var(--accent); border-radius: 3px; }
+  .stage-card .cnt { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+  .stage-card .go { color: var(--muted); flex-shrink: 0; }
+
+  /* 文档内容 */
+  .doc { padding-top: 18px; }
+  .doc h1 { font-size: 21px; margin: 10px 0 14px; line-height: 1.4; }
+  .doc h2 { font-size: 18px; margin: 26px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .doc h3 { font-size: 16px; margin: 22px 0 8px; }
+  .doc h3.task-h {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; margin: 24px 0 10px;
+  }
+  .doc h3.task-h input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; cursor: pointer; }
+  .doc h3.task-h.done span { color: var(--muted); text-decoration: line-through; }
+  .doc p { margin: 10px 0; }
+  .doc ul, .doc ol { margin: 10px 0 10px 22px; }
+  .doc li { margin: 5px 0; }
+  .doc code {
+    background: var(--panel2); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 5px; font-size: 13px;
+    font-family: Consolas, "Courier New", monospace; word-break: break-all;
+  }
+  .doc pre {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; overflow-x: auto; margin: 12px 0; -webkit-overflow-scrolling: touch;
+  }
+  .doc pre code { background: none; border: none; padding: 0; font-size: 13px; line-height: 1.6; word-break: normal; }
+  .doc blockquote {
+    border-left: 3px solid var(--accent); background: var(--panel);
+    padding: 10px 14px; border-radius: 0 10px 10px 0; margin: 12px 0;
+    color: #c9d1d9; font-size: 14px;
+  }
+  .doc .tbl { overflow-x: auto; margin: 12px 0; -webkit-overflow-scrolling: touch; }
+  .doc table { border-collapse: collapse; font-size: 13px; min-width: 100%; }
+  .doc th, .doc td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; white-space: nowrap; }
+  .doc th { background: var(--panel); }
+  .doc a { color: var(--blue); }
+  .doc hr { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  /* 上一篇/下一篇 */
+  .pager { display: flex; gap: 10px; margin-top: 32px; }
+  .pager a {
+    flex: 1; text-decoration: none; color: var(--text); font-size: 14px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .pager a:active { background: var(--panel2); }
+  .pager .dir { color: var(--muted); font-size: 12px; }
+  .pager .next { text-align: right; }
+  .pager .spacer { flex: 1; }
+
+  .err {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; margin-top: 24px; color: var(--muted); font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topbar" style="display:none">
+  <div class="inner">
+    <a class="back" href="#">← 目录</a>
+    <span class="ttl" id="barTitle"></span>
+    <span class="pill" id="barPill"></span>
+  </div>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const STAGES = [
+{ id:'s0', name:'阶段 0 · 从速度场到流映射', days:'约 2-3 天', count:5, file:'plan/stage0-从速度场到流映射.md' },
+{ id:'s1', name:'阶段 1 · 流映射的数学基础', days:'约 3-4 天', count:6, file:'plan/stage1-流映射的数学基础.md' },
+{ id:'s2', name:'阶段 2 · 一致性模型谱系', days:'约 3-4 天', count:6, file:'plan/stage2-一致性模型谱系.md' },
+{ id:'s3', name:'阶段 3 · 流映射统一框架', days:'约 3-4 天', count:6, file:'plan/stage3-流映射统一框架.md' },
+{ id:'s4', name:'阶段 4 · MeanFlow 核心', days:'约 4-5 天', count:6, file:'plan/stage4-MeanFlow核心.md' },
+{ id:'s5', name:'阶段 5 · MeanFlow 训练与实现', days:'约 4-5 天', count:7, file:'plan/stage5-MeanFlow训练与实现.md' },
+{ id:'s6', name:'阶段 6 · 论文源码与前沿', days:'约 5-7 天', count:6, file:'plan/stage6-论文源码与前沿.md' },
+];
+
+/* —— 与打卡面板共享同一份进度（同域 localStorage） —— */
+const KEY = 'flowmap-meanflow-v1';
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && s.done && s.checkins) return s;
+  } catch (e) {}
+  return { done: {}, checkins: {}, openStage: 's0' };
+}
+let state = loadState();
+function saveState() { localStorage.setItem(KEY, JSON.stringify(state)); }
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+/* —— 迷你 Markdown 渲染器 —— */
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function inline(s) {
+  s = esc(s);
+  const codes = [];   // 先把行内代码摘出来，避免其中的 ** 等被当作格式标记
+  s = s.replace(/`([^`]+)`/g, (m, c) => { codes.push(c); return '\x00I' + (codes.length - 1) + '\x00'; });
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  s = s.replace(/\x00I(\d+)\x00/g, (m, n) => '<code>' + codes[+n] + '</code>');
+  return s;
+}
+
+function mdToHtml(md) {
+  // 1) 先抽出所有代码块（含列表内缩进的代码块），用占位行替换
+  const codeStore = [];
+  const lines = [];
+  const raw = md.split(/\r?\n/);
+  for (let i = 0; i < raw.length; i++) {
+    const m = raw[i].match(/^(\s*)```/);
+    if (m) {
+      const indent = m[1];
+      const buf = [];
+      i++;
+      while (i < raw.length && !/^\s*```/.test(raw[i])) {
+        buf.push(raw[i].startsWith(indent) ? raw[i].slice(indent.length) : raw[i]);
+        i++;
+      }
+      codeStore.push('<pre><code>' + esc(buf.join('\n')) + '</code></pre>');
+      lines.push(indent + '\x00C' + (codeStore.length - 1) + '\x00');
+    } else {
+      lines.push(raw[i]);
+    }
+  }
+
+  let html = '', i = 0, taskIdx = 0;
+  const codePh = /^\x00C(\d+)\x00$/;
+
+  function renderList(block) {
+    const items = [];
+    for (const l of block) {
+      const m = l.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/);
+      if (m) items.push({ ind: m[1].length, ord: /\d/.test(m[2]), text: m[3], cont: [] });
+      else if (items.length) items[items.length - 1].cont.push(l.trim());
+    }
+    function liBody(it) {
+      let h = inline(it.text);
+      for (const c of it.cont) {
+        const cp = c.match(codePh);
+        h += cp ? codeStore[+cp[1]] : '<br>' + inline(c);
+      }
+      return h;
+    }
+    function build(start, ind) {
+      const parts = [];
+      let k = start;
+      const ord = items[start].ord;
+      while (k < items.length && items[k].ind >= ind) {
+        if (items[k].ind > ind) {
+          const r = build(k, items[k].ind);
+          parts[parts.length - 1] += r[0];
+          k = r[1];
+        } else {
+          parts.push('<li>' + liBody(items[k]) + '</li>');
+          k++;
+        }
+      }
+      const tag = ord ? 'ol' : 'ul';
+      return ['<' + tag + '>' + parts.join('') + '</' + tag + '>', k];
+    }
+    return items.length ? build(0, items[0].ind)[0] : '';
+  }
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    const cp = trimmed.match(codePh);
+
+    if (cp) {                                // 代码块占位符
+      html += codeStore[+cp[1]]; i++; continue;
+    }
+    if (/^\s*$/.test(line)) { i++; continue; }
+    if (/^#{1,6}\s/.test(line)) {
+      const m = line.match(/^(#{1,6})\s+(.*)$/);
+      const lvl = m[1].length;
+      let text = m[2];
+      if (lvl === 3 && /^☐\s*/.test(text)) {
+        text = text.replace(/^☐\s*/, '');
+        html += '<h3 class="task-h" id="task' + taskIdx + '"><input type="checkbox" class="task-cb" data-idx="' + taskIdx + '"><span>' + inline(text) + '</span></h3>';
+        taskIdx++;
+      } else {
+        html += '<h' + lvl + '>' + inline(text) + '</h' + lvl + '>';
+      }
+      i++; continue;
+    }
+    if (/^>\s?/.test(line)) {
+      const buf = [];
+      while (i < lines.length && /^>\s?/.test(lines[i])) buf.push(lines[i++].replace(/^>\s?/, ''));
+      html += '<blockquote>' + buf.map(inline).join('<br>') + '</blockquote>'; continue;
+    }
+    if (/^\|/.test(line) && i + 1 < lines.length && /^\|[\s\-|:]+\|?\s*$/.test(lines[i+1])) {
+      const headRow = line; i += 2;
+      const rows = [];
+      while (i < lines.length && /^\|/.test(lines[i])) rows.push(lines[i++]);
+      const cells = r => r.replace(/^\||\|\s*$/g, '').split('|').map(c => inline(c.trim()));
+      html += '<div class="tbl"><table><thead><tr>' + cells(headRow).map(c => '<th>' + c + '</th>').join('') +
+        '</tr></thead><tbody>' + rows.map(r => '<tr>' + cells(r).map(c => '<td>' + c + '</td>').join('') + '</tr>').join('') +
+        '</tbody></table></div>'; continue;
+    }
+    if (/^(\s*)([-*]|\d+\.)\s+/.test(line)) {
+      const buf = [];
+      while (i < lines.length && (/^(\s*)([-*]|\d+\.)\s+/.test(lines[i]) || /^\s{2,}\S/.test(lines[i]))) buf.push(lines[i++]);
+      html += renderList(buf); continue;
+    }
+    if (/^---+\s*$/.test(trimmed)) { html += '<hr>'; i++; continue; }
+    // 普通段落
+    const buf = [line];
+    i++;
+    while (i < lines.length && lines[i].trim() &&
+           !/^(#|>|\||---)/.test(lines[i].trim()) &&
+           !/^(\s*)([-*]|\d+\.)\s+/.test(lines[i]) &&
+           !codePh.test(lines[i].trim())) buf.push(lines[i++]);
+    html += '<p>' + buf.map(inline).join('<br>') + '</p>';
+  }
+  return html;
+}
+
+/* —— 视图 —— */
+const app = document.getElementById('app');
+const topbar = document.getElementById('topbar');
+const mdCache = {};
+
+function stageDone(s) {
+  let n = 0;
+  for (let k = 0; k < s.count; k++) if (state.done[s.id + 't' + k]) n++;
+  return n;
+}
+
+function renderHome() {
+  state = loadState();
+  topbar.style.display = 'none';
+  const total = STAGES.reduce((n, s) => n + s.count, 0);
+  const done = Object.keys(state.done).length;
+  let h = '<div class="hero"><h1>🌊 Flow Map &amp; MeanFlow</h1>' +
+    '<p>从流匹配到一步生成：吃透流映射与平均速度 · 总进度 ' + done + '/' + total + ' · 任务勾选与打卡面板实时同步</p></div>' +
+    '<div class="home-actions">' +
+    '<a class="btn-primary" href="tracker/index.html">📊 打卡面板 / 热力图</a>' +
+    '<a class="btn-ghost" href="#" target="_blank" rel="noopener">GitHub 仓库</a>' +
+    '</div>';
+  for (const s of STAGES) {
+    const d = stageDone(s);
+    const pct = Math.round(d / s.count * 100);
+    h += '<a class="stage-card" href="#' + s.id + '"><div class="info">' +
+      '<div class="nm">' + (d === s.count ? '🏆 ' : '') + s.name + '<span class="days">' + s.days + '</span></div>' +
+      '<div class="mini-bar"><div style="width:' + pct + '%"></div></div></div>' +
+      '<span class="cnt">' + d + '/' + s.count + '</span><span class="go">›</span></a>';
+  }
+  app.innerHTML = h;
+  window.scrollTo(0, 0);
+}
+
+async function renderStage(sid) {
+  state = loadState();
+  const idx = STAGES.findIndex(s => s.id === sid);
+  const s = STAGES[idx];
+  topbar.style.display = '';
+  document.getElementById('barTitle').textContent = s.name;
+  updatePill(s);
+
+  if (!(s.file in mdCache)) {
+    app.innerHTML = '<div class="doc"><p style="color:var(--muted)">加载中…</p></div>';
+    try {
+      const res = await fetch(encodeURI(s.file));
+      if (!res.ok) throw new Error(res.status);
+      mdCache[s.file] = await res.text();
+    } catch (e) {
+      app.innerHTML = '<div class="err">文档加载失败。<br><br>本地双击打开时浏览器禁止读取本地文件（CORS），请部署到 GitHub Pages 后在线阅读，或直接看 <code>plan/</code> 文件夹里的 markdown。</div>';
+      return;
+    }
+  }
+
+  let h = '<div class="doc">' + mdToHtml(mdCache[s.file]) + '</div>';
+  h += '<div class="pager">';
+  h += idx > 0
+    ? '<a href="#' + STAGES[idx-1].id + '"><div class="dir">‹ 上一阶段</div>' + STAGES[idx-1].name + '</a>'
+    : '<span class="spacer"></span>';
+  h += idx < STAGES.length - 1
+    ? '<a class="next" href="#' + STAGES[idx+1].id + '"><div class="dir">下一阶段 ›</div>' + STAGES[idx+1].name + '</a>'
+    : '<span class="spacer"></span>';
+  h += '</div>';
+  app.innerHTML = h;
+
+  app.querySelectorAll('.task-cb').forEach(cb => {
+    const tid = s.id + 't' + cb.dataset.idx;
+    cb.checked = !!state.done[tid];
+    cb.closest('.task-h').classList.toggle('done', cb.checked);
+    cb.addEventListener('change', () => {
+      state = loadState();
+      if (cb.checked) state.done[tid] = todayStr();
+      else delete state.done[tid];
+      saveState();
+      cb.closest('.task-h').classList.toggle('done', cb.checked);
+      updatePill(s);
+    });
+  });
+  window.scrollTo(0, 0);
+}
+
+function updatePill(s) {
+  document.getElementById('barPill').textContent = stageDone(s) + '/' + s.count + ' ✓';
+}
+
+function route() {
+  const sid = location.hash.replace('#', '');
+  if (STAGES.some(s => s.id === sid)) renderStage(sid);
+  else renderHome();
+}
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
