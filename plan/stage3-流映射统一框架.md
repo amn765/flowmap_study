@@ -3,7 +3,7 @@
 > 目标：站到「流映射统一框架」的高度，看清 Consistency / Shortcut / MeanFlow 都是同一棵树上的分支。重点掌握 Flow Map Matching（FMM）的 Lagrangian / Eulerian 两类目标，以及 Shortcut Models 的「步长条件 + 自一致」。学完你就能给任意一个新流映射方法「归类定位」。
 > （梯度提示：把阶段 2 的具体方法抽象成统一损失家族，是阶段 4 直接接 MeanFlow 的最后一块拼图。）
 
-主线资料：Flow Map Matching（Boffi, Albergo, Vanden-Eijnden, 2024）+ One Step Diffusion via Shortcut Models（Frans et al., 2024）。
+主线资料：[Flow Map Matching（Boffi et al., 2024）](https://arxiv.org/abs/2406.07507) + [One Step Diffusion via Shortcut Models（Frans et al., 2024）](https://arxiv.org/abs/2410.12557)。进阶可读 [How to build a consistency model：用自蒸馏学流映射（Boffi et al., 2025）](https://arxiv.org/abs/2505.18825)。
 
 ## 任务清单
 

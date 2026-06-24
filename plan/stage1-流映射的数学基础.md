@@ -3,7 +3,7 @@
 > 目标：把流映射从「直觉」落到「公式」。能写出双时间流映射的定义、半群性质的微分形式，并清楚它与速度场互相导出的关系。这是后面 MeanFlow 恒等式推导的地基。
 > （梯度提示：只比阶段 0 多了「把话写成方程」，用到的微积分不超过链式法则和微积分基本定理。）
 
-主线资料：Flow Map Matching（Boffi et al., 2024）第 2-3 节 + 任一 neural ODE / probability flow ODE 的复习材料。
+主线资料：[Flow Map Matching（Boffi et al., 2024）](https://arxiv.org/abs/2406.07507) 第 2-3 节 + 任一 neural ODE / probability flow ODE 的复习材料。
 
 ## 任务清单
 

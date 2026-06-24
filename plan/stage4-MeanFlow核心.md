@@ -3,7 +3,7 @@
 > 目标：这是整个网站的心脏。亲手推一遍 **MeanFlow 恒等式**，理解「用平均速度替代瞬时速度」为什么能让一步生成成立，并写出采样公式。推导只用到微积分基本定理和链式法则 —— 关键是把每一步的物理含义讲清楚。
 > （梯度提示：阶段 1 你已经会「积分 ↔ 求导」，阶段 3 你已见过「区间当条件」。这里只是把它们合成一个干净的恒等式。）
 
-主线资料：⭐ *Mean Flows for One-step Generative Modeling*（Geng, Deng, Bai, Kolter, He, 2025）第 3 节。建议打印出来逐行推。
+主线资料：⭐ [Mean Flows for One-step Generative Modeling（Geng, Deng, Bai, Kolter, He, 2025）](https://arxiv.org/abs/2505.13447) 第 3 节。建议打印出来逐行推。
 
 约定：用线性插值路径 `z_t = (1-t) x + t ε`，t∈[0,1]，`z_0 = x`（数据），`z_1 = ε`（噪声）。瞬时速度（条件流匹配目标）为 `v(z_t, t) = ε - x`。
 

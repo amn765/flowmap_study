@@ -43,8 +43,17 @@
 
 ## 推荐资料（全程通用）
 
-- MeanFlow：*Mean Flows for One-step Generative Modeling*（Geng, Deng, Bai, Kolter, He, 2025）—— 核心论文，反复读。
-- *Flow Map Matching*（Boffi, Albergo, Vanden-Eijnden, 2024）—— 统一框架。
-- *Consistency Models*（Song et al., 2023）与 *Consistency Trajectory Models*（Kim et al., 2024）—— 前身谱系。
-- *One Step Diffusion via Shortcut Models*（Frans et al., 2024）—— 步长条件自一致。
-- PyTorch `torch.func.jvp` 官方文档 —— 阶段 5 实现关键。
+**核心论文**
+- [Mean Flows for One-step Generative Modeling](https://arxiv.org/abs/2505.13447)（Geng, Deng, Bai, Kolter, He, 2025）—— MeanFlow 核心论文，反复读。
+- [Flow Map Matching](https://arxiv.org/abs/2406.07507)（Boffi, Albergo, Vanden-Eijnden, 2024）—— 流映射统一框架。
+- [Consistency Models](https://arxiv.org/abs/2303.01469)（Song et al., 2023）与 [Consistency Trajectory Models / CTM](https://arxiv.org/abs/2310.02279)（Kim et al., 2024）—— 前身谱系。
+- [One Step Diffusion via Shortcut Models](https://arxiv.org/abs/2410.12557)（Frans et al., 2024）—— 步长条件自一致。
+
+**进阶 / 前沿**
+- [How to build a consistency model：用自蒸馏学流映射](https://arxiv.org/abs/2505.18825)（Boffi et al., 2025）—— Eulerian 自蒸馏。
+- [Simplifying, Stabilizing and Scaling Continuous-Time Consistency Models（sCM）](https://arxiv.org/abs/2410.11081)（2024）—— 连续时间一致性。
+- [Improved Mean Flows / iMF](https://arxiv.org/abs/2512.02012)（2025）与 [Align Your Flow](https://arxiv.org/abs/2506.14603)（2025）—— MeanFlow 后续与流映射蒸馏前沿。
+
+**代码与文档**
+- MeanFlow 官方代码：[JAX 实现（Gsunshine/meanflow）](https://github.com/Gsunshine/meanflow) · [PyTorch 实现（zhuyu-cs/MeanFlow）](https://github.com/zhuyu-cs/MeanFlow)。
+- [PyTorch `torch.func.jvp` 官方文档](https://pytorch.org/docs/stable/generated/torch.func.jvp.html) —— 阶段 5 实现关键。

@@ -3,7 +3,7 @@
 > 目标：搞清楚「为什么有了 flow matching 还要 flow map」。你已经会用速度场 + ODE 多步采样，这一阶段要把视角从「学瞬时速度」切换到「直接学时间到时间的映射」，并在脑子里建立整个流映射方法族的地图。
 > （梯度提示：这一阶段不推公式，只对齐动机和术语，为后面所有阶段铺路。）
 
-主线资料：MeanFlow 论文 *Mean Flows for One-step Generative Modeling*（Geng et al., 2025）的引言与相关工作章节 + Flow Map Matching（Boffi, Albergo, Vanden-Eijnden, 2024）的引言。
+主线资料：[MeanFlow 论文（Mean Flows for One-step Generative Modeling, Geng et al., 2025）](https://arxiv.org/abs/2505.13447) 的引言与相关工作章节 + [Flow Map Matching（Boffi, Albergo, Vanden-Eijnden, 2024）](https://arxiv.org/abs/2406.07507) 的引言。
 
 ## 任务清单
 

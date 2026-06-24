@@ -3,7 +3,7 @@
 > 目标：把阶段 4 的恒等式落成可运行的代码。核心是用 **JVP（Jacobian-vector product）** 一次前向算出 `v·∂_z u + ∂_t u`，再配上时间采样、损失加权、CFG，最后在一个 2D 玩具分布上真正训出一步生成。
 > （梯度提示：数学已在阶段 4 备齐，这里全是工程化 —— 把每个公式对应到几行 PyTorch。）
 
-主线资料：MeanFlow 论文第 4 节 + 官方/复现仓库代码 + PyTorch `torch.func.jvp` 文档。
+主线资料：[MeanFlow 论文](https://arxiv.org/abs/2505.13447) 第 4 节 + 官方代码（[JAX 官方实现](https://github.com/Gsunshine/meanflow) / [PyTorch 实现](https://github.com/zhuyu-cs/MeanFlow)）+ [PyTorch torch.func.jvp 官方文档](https://pytorch.org/docs/stable/generated/torch.func.jvp.html)。
 
 ## 任务清单
 
